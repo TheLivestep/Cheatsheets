@@ -1550,3 +1550,5 @@ echo "@reboot /tmp/malicious.sh" >> /var/spool/cron/crontabs/$USER	# User-level 
 echo "@reboot root /path/to/malicious.sh" >> /etc/crontab	# System-wide Cron: Create the CRON job to run at boot:
 
 
+# SLIVER
+
