@@ -1,9 +1,12 @@
 # CHEATSHEETS
 
-# PORT SCAN
+# PORT SCAN | discovery
 for p in {1..65535}; do nc -vn <RHOST> $p -w 1 -z & done 2> <FILE>.txt	# port scan oneliner BASH
 export ip=<RHOST>; for port in $(seq 1 65535); do timeout 0.01 bash -c "</dev/tcp/$ip/$port && echo The port $port is open || echo The Port $port is closed > /dev/null" 2>/dev/null || echo Connection Timeout > /dev/null; done 	# port scanner oneliner WINDOWS
+for i in { 1..255 };do ping -c 1 192.168.110.$i > /dev/null; if [ $? -eq 0 ];then echo 192.168.110.$i;fi;done	# identify alive hosts | discovery | bash oneliner
 
+# PIVOT
+sudo sshuttle -r riley@10.10.110.35 192.168.110.0/24 -v		# Pivoting # SSH
 
 # ACTIVE DIRECTORY
 
