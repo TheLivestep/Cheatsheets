@@ -1675,5 +1675,7 @@ Set-Content -Path "C:\Users\mrbas\Desktop\Test\Downloaded.pdf" -Stream Zone.Iden
 echo "@reboot /tmp/malicious.sh" >> /var/spool/cron/crontabs/$USER	# User-level Cron: Create the CRON job to run at boot 
 echo "@reboot root /path/to/malicious.sh" >> /etc/crontab	# System-wide Cron: Create the CRON job to run at boot:
 
-
-# SLIVER
+# HAVOC
+havoc server --profile profiles/havoc.yaotl -v		# Start the teamserver normally with verbose messaging
+havoc server -d		# Start the teamserver with the default profile
+havoc server --profile profiles/havoc.yaotl --verbose 	# Start the teamserver with verbose flag enabled
