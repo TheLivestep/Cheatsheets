@@ -1,5 +1,6 @@
 # CHEATSHEETS
 
+curl -H "Range: 10000" url	# WEB directory listing vuln
 nsupdate, server $IP, update add sub.domain.htb 3600 A 10.10.14.251, send   # Update DNS remote 
 dsacls "CN=P.ADAMS,OU=HELPDESK CERTIFICATE,DC=SCEPTER,DC=HTB"	# Show permissions certificate
 nxc ldap scepter.htb -u user -p pass --query "(aAMAccountName=*)" "altSecurityIdentities" 	# show attribute (ESC14 - email) 
